@@ -173,17 +173,18 @@ export const ResultsView = ({
     <div className="results">
       <div className="results-capture" ref={captureRef}>
         <div className="results-head">
-          {onTitleChange && <h1 className="sr-only">{title}</h1>}
+          {onTitleChange && <h1 className="sr-only">{title || 'Your ranking'}</h1>}
           {onTitleChange ? (
             <input
               className="results-title-input"
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
               aria-label="Ranking title"
+              placeholder="Add a title"
               maxLength={120}
             />
           ) : (
-            <h1 className="results-title">{title}</h1>
+            title && <h1 className="results-title">{title}</h1>
           )}
           {subtitle && <p className="muted results-sub">{subtitle}</p>}
         </div>

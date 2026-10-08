@@ -52,7 +52,7 @@ export const toPasteList = (title: string, ranked: RankedGroup[], appLink?: stri
 
 export const toPlainText = (title: string, ranked: RankedGroup[], link?: string, limit?: number) =>
   [
-    title,
+    ...(title.trim() ? [title.trim()] : []),
     ...ranked
       .flatMap(({ rank, items }) => items.map((item) => `${rank}. ${item.label}`))
       .slice(0, limit),

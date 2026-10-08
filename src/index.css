@@ -2501,3 +2501,8 @@ textarea {
 .wordmark .wordmark-b {
   background: #d81b60;
 }
+
+.results-title-input::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}

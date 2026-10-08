@@ -229,6 +229,34 @@ test('my rankings lists finished and unfinished sorts', async ({ page }) => {
   await expect(page.locator('.sorter-stats')).toContainText('Pick 2');
 });
 
+test('a list copied as plain text from Discord gets its songs and pictures back', async ({
+  page
+}) => {
+  await page.goto('./');
+  await pasteList(
+    page,
+    'Song 2 | https://example.com/two.png\nSong 1 | https://example.com/one.png\nSong 3'
+  );
+  await page.getByRole('button', { name: 'Start sorting' }).click();
+  await sortByNumber(page);
+  await expect(page.locator('.results-title-input')).toHaveValue('');
+
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Clear list' }).click();
+  await pasteList(
+    page,
+    'Untitled ranking\n1. Song 1\n2. Song 2\n3. Song 3\nSorted with Sort Anything'
+  );
+  await expect(page.locator('.toast')).toContainText('songs restored for 2');
+  await expect(page.getByLabel('Ranking name')).toHaveValue('');
+  expect(await listLabels(page)).toEqual(['Song 1', 'Song 2', 'Song 3']);
+  await expect(page.locator('.item-rank')).toHaveText(['1', '2', '3']);
+  await expect(page.locator('.item-row').nth(0).locator('img')).toHaveAttribute(
+    'src',
+    'https://example.com/one.png'
+  );
+});
+
 test('help page explains copying from Discord', async ({ page }) => {
   await page.goto('./');
   await page.getByRole('link', { name: 'How to use', exact: true }).click();

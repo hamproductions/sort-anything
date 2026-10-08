@@ -4,6 +4,13 @@ import { formatRelative } from '~/lib/format';
 import { deleteSession, listSessions } from '~/lib/storage';
 import type { Session } from '~/lib/types';
 
+const sessionName = (session: Session) =>
+  session.title ||
+  `${session.items
+    .slice(0, 3)
+    .map((item) => item.label)
+    .join(', ')}${session.items.length > 3 ? '…' : ''}`;
+
 export const RankingsMenu = ({ route }: { route: string }) => {
   const [open, setOpen] = useState(false);
   const [sessions, setSessions] = useState<Session[]>(() => listSessions());
@@ -63,7 +70,7 @@ export const RankingsMenu = ({ route }: { route: string }) => {
                       role="menuitem"
                       href={session.finishedAt ? `#/done/${session.id}` : `#/s/${session.id}`}
                     >
-                      <span className="menu-title">{session.title}</span>
+                      <span className="menu-title">{sessionName(session)}</span>
                       <span className="muted menu-meta">
                         {session.finishedAt ? 'Finished' : `${Math.round(progress * 100)}% sorted`},{' '}
                         {session.items.length} items, {formatRelative(session.updatedAt)}
@@ -76,7 +83,7 @@ export const RankingsMenu = ({ route }: { route: string }) => {
                     </a>
                     <button
                       className="icon-button"
-                      aria-label={`Delete ${session.title}`}
+                      aria-label={`Delete ${sessionName(session)}`}
                       title="Delete"
                       onClick={() => {
                         deleteSession(session.id);

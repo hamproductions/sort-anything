@@ -44,7 +44,7 @@ export const startSession = ({ title, items, ranking, unranked, mode, shuffle }:
   const now = Date.now();
   const session: Session = {
     id: createId(),
-    title: title.trim() || 'Untitled ranking',
+    title: title.trim(),
     items: sessionItems,
     engine,
     history: [],

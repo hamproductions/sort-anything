@@ -178,4 +178,36 @@ describe('parseInput', () => {
     expect(result.unranked).toEqual([3]);
     expect(result.duplicates).toEqual([]);
   });
+
+  it('reads a ranking copied from a rendered Discord message', () => {
+    const result = parseInput(
+      'Floweriry\n1. スターチス\n2. レモンスノー\n3. Dandelion\n4. シクラメンにそよ風を\n5. baby blue eyes\n6. 桜理論値\n7. 青いアマリリス\n8. プルメリア\n9. 向日葵\n10. 彗星が咲くには\nSorted with Sort Anything'
+    );
+    expect(result.title).toBe('Floweriry');
+    expect(result.items).toHaveLength(10);
+    expect(result.items[0]).toEqual({ label: 'スターチス' });
+    expect(result.ranking).toEqual(Array.from({ length: 10 }, (_, i) => [i]));
+    expect(result.unranked).toEqual([]);
+  });
+
+  it('drops a placeholder title instead of using it', () => {
+    const result = parseInput(
+      'Untitled ranking\n1. 向日葵\n2. プルメリア\n3. baby blue eyes\nSorted with Sort Anything'
+    );
+    expect(result.title).toBeUndefined();
+    expect(result.items.map((item) => item.label)).toEqual([
+      '向日葵',
+      'プルメリア',
+      'baby blue eyes'
+    ]);
+    expect(result.unranked).toEqual([]);
+  });
+
+  it('skips chat headers when several messages are copied', () => {
+    const result = parseInput(
+      'hamza — Today at 3:04 PM\n1. A\n2. B\nfriend — Yesterday at 11:20 PM\n3. C'
+    );
+    expect(result.items.map((item) => item.label)).toEqual(['A', 'B', 'C']);
+    expect(result.ranking).toEqual([[0], [1], [2]]);
+  });
 });

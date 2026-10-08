@@ -92,7 +92,7 @@ export const SorterPage = ({ id }: { id: string }) => {
   const [exiting, setExiting] = useState<Choice>();
   const pending = useRef<{ choice: Choice; ms: number; timer: number }>(undefined);
   const { toggle, stop } = usePlayer();
-  useDocumentTitle(session ? `Sorting ${session.title}` : undefined);
+  useDocumentTitle(session ? `Sorting ${session.title}`.trim() : undefined);
 
   useEffect(() => {
     if (!session) return;
@@ -218,7 +218,11 @@ export const SorterPage = ({ id }: { id: string }) => {
   return (
     <div className="sorter">
       <div className="sorter-head">
-        <h1 className="sorter-title">{session.title}</h1>
+        {session.title ? (
+          <h1 className="sorter-title">{session.title}</h1>
+        ) : (
+          <h1 className="sr-only">Sorting</h1>
+        )}
         <div className="sorter-stats">
           <span>Pick {session.comparisons + 1}</span>
           <span className="muted">about {remaining} to go</span>

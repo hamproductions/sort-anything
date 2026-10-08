@@ -41,7 +41,7 @@ export const SharedResultsPage = ({ data }: { data: string }) => {
         </button>
       </div>
       <ResultsView
-        title={list.title || 'Untitled ranking'}
+        title={list.title}
         items={items}
         groups={groups}
         subtitle={<>{items.length} items</>}

@@ -81,7 +81,7 @@ const buildData = async (
 
   return {
     data: {
-      title: title || 'My ranking',
+      title: title.trim(),
       total: flat.length,
       picks: stats?.picks,
       durationMs: stats?.durationMs,
@@ -302,7 +302,7 @@ export const RecapPlayer = ({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${(built?.data.title ?? 'ranking').replace(/[^\p{L}\p{N}]+/gu, '-')}-top.png`;
+      a.download = `${(built?.data.title || 'ranking').replace(/[^\p{L}\p{N}]+/gu, '-')}-top.png`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } finally {

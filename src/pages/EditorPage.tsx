@@ -8,6 +8,7 @@ import { startSession } from '~/lib/session';
 import { saveSession, writeJson } from '~/lib/storage';
 import { fetchMediaInfo, youtubePlaylistId } from '~/lib/media';
 import { importYouTubePlaylist } from '~/lib/youtube-playlist';
+import { restoreMedia } from '~/lib/memory';
 import {
   DRAFT_KEY,
   EMPTY_DRAFT,
@@ -130,14 +131,16 @@ export const EditorPage = ({ listData }: { listData?: string }) => {
     const parsed = parseInput(text);
     parsed.playlists.forEach(importPlaylist);
     if (parsed.spotifyCollections.length > 0) setSpotifyHint(true);
-    const { items, added, merged } = mergeItems(draft.items, draftItemsFrom(parsed));
+    const { items: incoming, restored } = restoreMedia(draftItemsFrom(parsed));
+    const { items, added, merged } = mergeItems(draft.items, incoming);
     setDraft((d) => ({ ...d, title: d.title || parsed.title || '', items }));
     setPasteText('');
     if (added || merged) {
       toast(
         [
           added && `Added ${added} ${added === 1 ? 'item' : 'items'}`,
-          merged && `${merged} already in the list`
+          merged && `${merged} already in the list`,
+          restored && `songs restored for ${restored}`
         ]
           .filter(Boolean)
           .join(', ')

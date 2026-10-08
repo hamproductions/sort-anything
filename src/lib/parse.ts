@@ -142,6 +142,11 @@ const parseCells = (cells: string[]): Line | undefined => {
   };
 };
 
+const APP_FOOTER = /^(?:-#\s*)?(?:sorted|made|ranked) with \[?sort anything\b/i;
+const CHAT_HEADER =
+  /^.{1,60}\s[—–-]\s(?:today|yesterday|\d{1,4}[/.-]\d{1,2}[/.-]\d{1,4}|\d{1,2}:\d{2}|今日|昨日)\b.*$/i;
+const PLACEHOLDER_TITLE = /^(?:untitled ranking|my ranking)$/i;
+
 const BOLD_RANK = /^\*\*(\d{1,4}[.)]?)\*\*\s*/;
 
 const parseLine = (raw: string): Line | undefined => {
@@ -233,6 +238,7 @@ export const parseInput = (text: string): ParseResult => {
   rawLines.forEach((raw, i) => {
     const trimmed = raw.trim();
     if (!trimmed || SEPARATOR_ROW.test(trimmed) || trimmed.startsWith('-# ')) return;
+    if (APP_FOOTER.test(trimmed) || CHAT_HEADER.test(trimmed)) return;
     if (trimmed.startsWith('|') && SEPARATOR_ROW.test(rawLines[i + 1]?.trim() ?? '')) return;
     const heading = trimmed.match(HEADING);
     if (heading && !RANK.test(trimmed)) {
@@ -287,7 +293,7 @@ export const parseInput = (text: string): ParseResult => {
   const unranked = items.map((_, i) => i).filter((i) => !rankedIds.has(i));
 
   return {
-    title,
+    title: title && !PLACEHOLDER_TITLE.test(title.trim()) ? title : undefined,
     items,
     ranking: ranking && ranking.length > 0 ? ranking : undefined,
     unranked,

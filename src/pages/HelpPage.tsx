@@ -76,8 +76,13 @@ export const HelpPage = () => {
         </ol>
         <p>
           If the list is spread over several messages, select across them with the mouse and copy
-          with <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>C</kbd>. Usernames and timestamps that come along
-          become items; remove them with the × on each row.
+          with <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>C</kbd>. Name and time lines are skipped; anything
+          else that slips in can be removed with the × on its row.
+        </p>
+        <p>
+          Selecting text in Discord copies only the visible names, not the song links. If you have
+          sorted those songs before on this device, their songs and pictures are added back
+          automatically.
         </p>
         <p>
           Posting your result back to Discord works the other way: press <strong>Copy list</strong>{' '}

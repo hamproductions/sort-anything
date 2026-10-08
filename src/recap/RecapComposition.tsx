@@ -228,8 +228,14 @@ const IntroSlide = ({ data }: { data: RecapData }) => {
     <AbsoluteFill style={{ background: INK }}>
       <Blobs colors={[BLUE, PINK, GOLD]} />
       <AbsoluteFill style={{ padding: 96, justifyContent: 'center', gap: 48 }}>
-        <Words text="Your ranking," size={96} />
-        <Words text={data.title} size={data.title.length > 22 ? 132 : 180} delay={8} />
+        {data.title ? (
+          <>
+            <Words text="Your ranking," size={96} />
+            <Words text={data.title} size={data.title.length > 22 ? 132 : 180} delay={8} />
+          </>
+        ) : (
+          <Words text="Your ranking" size={180} />
+        )}
         <div
           style={{
             alignSelf: 'flex-start',
@@ -473,7 +479,7 @@ const SummarySlide = ({ data }: { data: RecapData }) => {
         <div style={{ fontFamily: BODY, fontWeight: 700, fontSize: 42, color: GOLD }}>
           My top {data.entries.length}
         </div>
-        <Words text={data.title} size={data.title.length > 22 ? 88 : 116} />
+        {data.title && <Words text={data.title} size={data.title.length > 22 ? 88 : 116} />}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 30, marginTop: 30 }}>
           {data.entries.map((entry, i) => {
             const row = spring({ frame: frame - 10 - i * 5, fps, config: { damping: 14 } });
