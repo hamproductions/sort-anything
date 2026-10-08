@@ -11,6 +11,7 @@ import {
 } from '~/lib/media';
 import type { RankedGroup } from '~/lib/format';
 import type { Item, Pick } from '~/lib/types';
+import type { Qr } from '~/lib/qr';
 import { FPS, HEIGHT, RecapComposition, WIDTH, recapTimeline } from './RecapComposition';
 import type { RecapData, RecapDecision, RecapEntry } from './RecapComposition';
 import { createSong } from './songs';
@@ -99,11 +100,13 @@ export const RecapPlayer = ({
   title,
   ranked,
   stats,
+  qr,
   onClose
 }: {
   title: string;
   ranked: RankedGroup[];
   stats?: RecapStats;
+  qr?: Qr;
   onClose: () => void;
 }) => {
   const [built, setBuilt] = useState<{ data: RecapData; songs: (string | undefined)[] }>();
@@ -298,7 +301,7 @@ export const RecapPlayer = ({
     setSaving(true);
     try {
       const { domToBlob } = await import('modern-screenshot');
-      const blob = await domToBlob(node, { scale: 2 });
+      const blob = await domToBlob(node, { scale: WIDTH / node.getBoundingClientRect().width });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -355,7 +358,7 @@ export const RecapPlayer = ({
             <Player
               ref={playerRef}
               component={RecapComposition}
-              inputProps={{ data: built.data }}
+              inputProps={{ data: { ...built.data, qr } }}
               durationInFrames={timeline.duration}
               fps={FPS}
               compositionWidth={WIDTH}

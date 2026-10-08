@@ -19,12 +19,16 @@ export const App = () => {
       <SorterPage key={param} id={param} />
     ) : name === 'done' && param ? (
       <SessionResultsPage key={param} id={param} />
-    ) : name === 'r' && param ? (
-      <SharedResultsPage key={param} data={param} />
+    ) : (name === 'r' || name === 'R') && param ? (
+      <SharedResultsPage key={param} route={name} data={param} />
     ) : name === 'help' ? (
       <HelpPage />
     ) : (
-      <EditorPage listData={name === 'l' ? param : undefined} />
+      <EditorPage
+        listLink={
+          (name === 'l' || name === 'L') && param ? { route: name, data: param } : undefined
+        }
+      />
     );
 
   return (

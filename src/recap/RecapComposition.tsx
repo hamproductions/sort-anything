@@ -29,6 +29,7 @@ export type RecapData = {
   toughest?: RecapDecision;
   easiest?: RecapDecision;
   entries: RecapEntry[];
+  qr?: { path: string; size: number };
 };
 
 export type Slide =
@@ -572,6 +573,27 @@ const SummarySlide = ({ data }: { data: RecapData }) => {
           Anything
         </span>
       </div>
+      {data.qr && (
+        <div
+          style={{
+            position: 'absolute',
+            right: 90,
+            bottom: 90,
+            width: 380,
+            padding: 20,
+            borderRadius: 26,
+            background: '#fff'
+          }}
+        >
+          <svg
+            viewBox={`0 0 ${data.qr.size} ${data.qr.size}`}
+            shapeRendering="crispEdges"
+            style={{ display: 'block', width: '100%' }}
+          >
+            <path d={data.qr.path} fill={INK} />
+          </svg>
+        </div>
+      )}
     </AbsoluteFill>
   );
 };

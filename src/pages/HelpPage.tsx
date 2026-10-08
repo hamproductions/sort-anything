@@ -145,7 +145,12 @@ export const HelpPage = () => {
             skip, hold to pause, and save any slide as a picture.
           </li>
           <li>
-            <strong>Save image</strong> downloads the ranking as a picture.
+            <strong>Save image</strong> downloads the ranking as a picture with a QR code at the
+            bottom. Scanning it opens your exact ranking, songs included.
+          </li>
+          <li>
+            <strong>QR code</strong> shows the code large, for scanning from another screen or
+            saving on its own. The recap’s last slide carries it too.
           </li>
           <li>
             Under <strong>More</strong>: a share link that opens your exact ranking, a link that

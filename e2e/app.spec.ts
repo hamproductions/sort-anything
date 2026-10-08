@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import jsQR from 'jsqr';
+import { PNG } from 'pngjs';
 
 const pasteList = async (page: Page, text: string) => {
   const box = page.getByLabel('Add items');
@@ -18,7 +20,7 @@ const pickCount = async (page: Page) =>
   Number((await page.locator('.sorter-stats').textContent())?.match(/Pick (\d+)/)?.[1] ?? 0);
 
 const sortByNumber = async (page: Page) => {
-  for (let i = 0; i < 80; i++) {
+  for (let i = 0; i < 250; i++) {
     if (page.url().includes('#/done/')) return;
     const left = await page.locator('.side-left .side-label').first().textContent();
     const right = await page.locator('.side-right .side-label').first().textContent();
@@ -169,7 +171,7 @@ test('share link shows the ranking to someone else', async ({ page, browser }) =
   await page.getByRole('button', { name: 'More', exact: true }).click();
   await page.getByRole('menuitem', { name: 'Copy share link' }).click();
   const link = await page.evaluate(() => navigator.clipboard.readText());
-  expect(link).toMatch(/#\/r\//);
+  expect(link).toMatch(/#\/R\//);
 
   const friend = await browser.newContext();
   const other = await friend.newPage();
@@ -181,6 +183,41 @@ test('share link shows the ranking to someone else', async ({ page, browser }) =
   await expect(other).toHaveURL(/#\/s\//);
   await expect(other.locator('.side-label')).toHaveCount(2);
   await friend.close();
+});
+
+test('the QR code scans to a link that opens the ranking', async ({ page, browser }) => {
+  test.setTimeout(120_000);
+  await page.goto('./');
+  await page.getByLabel('Ranking name').fill('QR test');
+  const ids = Array.from({ length: 29 }, (_, i) => `${i}`.padStart(2, '0').repeat(11));
+  await pasteList(
+    page,
+    ids
+      .map((id, i) => `Song ${29 - i} ラブライブ | https://open.spotify.com/track/${id}`)
+      .join('\n')
+  );
+  await page.getByRole('button', { name: 'Start sorting' }).click();
+  await sortByNumber(page);
+
+  await expect(page.locator('.results-qr')).toBeVisible();
+  await page.getByRole('button', { name: 'QR code' }).click();
+  const big = page.locator('.qr-big');
+  await expect(big).toBeVisible();
+  const png = PNG.sync.read(await big.screenshot());
+  const scanned = jsQR(new Uint8ClampedArray(png.data), png.width, png.height)?.data;
+  expect(scanned).toMatch(/^http:\/\/localhost:\d+\/#\/R\//);
+
+  const friend = await browser.newContext();
+  const other = await friend.newPage();
+  await other.goto(scanned!);
+  await expect(other.locator('.results-title')).toHaveText('QR test');
+  expect(await rankedLabels(other)).toEqual(
+    Array.from({ length: 29 }, (_, i) => `Song ${i + 1} ラブライブ`)
+  );
+  await friend.close();
+
+  await page.keyboard.press('Escape');
+  await expect(big).toHaveCount(0);
 });
 
 test('recap plays through to the end and closes', async ({ page }) => {

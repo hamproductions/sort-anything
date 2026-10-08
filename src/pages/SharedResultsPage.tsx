@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { navigate } from '~/lib/hooks';
-import { decodeList } from '~/lib/share';
+import { decodeShared } from '~/lib/share';
 import { startSession } from '~/lib/session';
 import { saveSession, writeJson } from '~/lib/storage';
 import type { Item } from '~/lib/types';
@@ -8,8 +8,8 @@ import { ResultsView } from '~/components/ResultsView';
 import { NotFound } from '~/components/NotFound';
 import { DRAFT_KEY, draftFromItems } from '~/lib/draft';
 
-export const SharedResultsPage = ({ data }: { data: string }) => {
-  const list = useMemo(() => decodeList(data), [data]);
+export const SharedResultsPage = ({ route, data }: { route: string; data: string }) => {
+  const list = useMemo(() => decodeShared(route, data), [route, data]);
 
   if (!list) return <NotFound what="shared ranking" />;
 

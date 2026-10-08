@@ -6,6 +6,8 @@ import { useDocumentTitle, usePersistentState } from '~/lib/hooks';
 import type { Item } from '~/lib/types';
 import { useToast } from './Toast';
 import type { RecapStats } from '~/recap/RecapPlayer';
+import { QrSvg, useQr } from './QrCode';
+import type { Qr } from '~/lib/qr';
 import { MediaThumb, Thumb, useItemImage } from './MediaPlayer';
 
 const RecapPlayer = lazy(() =>
@@ -105,6 +107,12 @@ export const ResultsView = ({
   const effectiveLayout = hasImages ? layout : 'list';
 
   const shared = () => toSharedList(title, items, groups);
+  const shareLink = useMemo(
+    () => resultLink(toSharedList(title, items, groups)),
+    [title, items, groups]
+  );
+  const qr = useQr(shareLink);
+  const [showQr, setShowQr] = useState(false);
 
   const copy = async (text: string, message: string) => {
     try {
@@ -206,6 +214,7 @@ export const ResultsView = ({
               {busy ? 'Rendering…' : 'Save image'}
             </button>
             <button onClick={() => setRevealing(true)}>Play recap</button>
+            <button onClick={() => setShowQr(true)}>QR code</button>
             <div className="menu" ref={moreRef}>
               <button
                 aria-haspopup="menu"
@@ -298,6 +307,7 @@ export const ResultsView = ({
               title={title}
               ranked={ranked}
               stats={stats}
+              qr={qr}
               onClose={() => setRevealing(false)}
             />
           </Suspense>
@@ -379,10 +389,105 @@ export const ResultsView = ({
             ))}
           </ol>
         )}
-        <p className="results-foot">Made with Sort Anything</p>
+        <div className="results-foot">
+          {qr && (
+            <QrSvg
+              qr={qr}
+              className="results-qr"
+              label="QR code that opens this ranking"
+              style={{ width: `max(160px, ${(qr.size + 8) * 2}px)` }}
+            />
+          )}
+          <div className="results-foot-text">
+            {qr && <strong>Scan to see this ranking and sort it yourself</strong>}
+            <span>Made with Sort Anything</span>
+          </div>
+        </div>
       </div>
 
       {actions && <div className="results-next">{actions}</div>}
+      {showQr && qr && (
+        <QrDialog qr={qr} link={shareLink} title={title} onClose={() => setShowQr(false)} />
+      )}
+    </div>
+  );
+};
+
+const QrDialog = ({
+  qr,
+  link,
+  title,
+  onClose
+}: {
+  qr: Qr;
+  link: string;
+  title: string;
+  onClose: () => void;
+}) => {
+  const toast = useToast();
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const save = () => {
+    const scale = 12;
+    const side = (qr.size + 8) * scale;
+    const canvas = document.createElement('canvas');
+    canvas.width = side;
+    canvas.height = side;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    context.fillStyle = '#fff';
+    context.fillRect(0, 0, side, side);
+    context.fillStyle = '#12152a';
+    context.translate(4 * scale, 4 * scale);
+    context.scale(scale, scale);
+    context.fill(new Path2D(qr.path));
+    canvas.toBlob((blob) => {
+      if (blob) download(blob, `${slug(title)}-qr.png`);
+    });
+  };
+
+  return (
+    <div
+      className="qr-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label="QR code"
+      onClick={onClose}
+    >
+      <div className="qr-panel" onClick={(event) => event.stopPropagation()}>
+        <QrSvg
+          qr={qr}
+          className="qr-big"
+          label="QR code that opens this ranking"
+          style={{ width: `${(qr.size + 8) * Math.max(2, Math.floor(412 / (qr.size + 8)))}px` }}
+        />
+        <p className="qr-caption">Scan to open this ranking on another device.</p>
+        <div className="row wrap qr-actions">
+          <button className="primary small" onClick={save}>
+            Save QR image
+          </button>
+          <button
+            className="small"
+            onClick={() =>
+              void navigator.clipboard.writeText(link).then(
+                () => toast('Link copied'),
+                () => toast('Copy was blocked by the browser.')
+              )
+            }
+          >
+            Copy link
+          </button>
+          <button className="ghost small" onClick={onClose}>
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

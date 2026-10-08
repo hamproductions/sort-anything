@@ -1,5 +1,5 @@
 import { isMediaUrl, isSpotifyCollection, youtubePlaylistId } from './media';
-import { SHARE_LINK_PATTERN, decodeList } from './share';
+import { SHARE_LINK_PATTERN, decodeShared } from './share';
 
 export type ParsedItem = { label: string; image?: string; media?: string };
 
@@ -212,8 +212,8 @@ export const parseInput = (text: string): ParseResult => {
   };
 
   const links = [...text.matchAll(SHARE_LINK_PATTERN)];
-  for (const [, , data] of links) {
-    const list = decodeList(data);
+  for (const [, legacyRoute, legacyData, route, data] of links) {
+    const list = decodeShared(route ?? legacyRoute, data ?? legacyData);
     if (!list) continue;
     title ??= list.title || undefined;
     const ids = list.items.map((item) => add(item));

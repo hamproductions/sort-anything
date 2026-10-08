@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ClipboardEvent, DragEvent } from 'react';
 import { navigate, useDocumentTitle, usePersistentState } from '~/lib/hooks';
 import { parseInput } from '~/lib/parse';
-import { decodeList } from '~/lib/share';
+import { decodeShared } from '~/lib/share';
 import { calculateMaxComparisons } from '~/lib/merge-sort';
 import { startSession } from '~/lib/session';
 import { saveSession, writeJson } from '~/lib/storage';
@@ -46,7 +46,7 @@ const insertEstimate = (ranked: number, pending: number) =>
 const looksLikeList = (text: string) =>
   /\n/.test(text.trim()) || /https?:\/\/|spotify:/.test(text) || /[,;、]/.test(text);
 
-export const EditorPage = ({ listData }: { listData?: string }) => {
+export const EditorPage = ({ listLink }: { listLink?: { route: string; data: string } }) => {
   const toast = useToast();
   const [draft, setDraft] = useState<Draft>(loadDraft);
   const [pasteText, setPasteText] = useState('');
@@ -66,9 +66,9 @@ export const EditorPage = ({ listData }: { listData?: string }) => {
   }, [draft]);
 
   useEffect(() => {
-    if (!listData || loadedLink.current === listData) return;
-    loadedLink.current = listData;
-    const list = decodeList(listData);
+    if (!listLink || loadedLink.current === listLink.data) return;
+    loadedLink.current = listLink.data;
+    const list = decodeShared(listLink.route, listLink.data);
     if (list) {
       setDraft(
         draftFromItems(
@@ -82,7 +82,7 @@ export const EditorPage = ({ listData }: { listData?: string }) => {
     }
     history.replaceState(null, '', '#/');
     dispatchEvent(new HashChangeEvent('hashchange'));
-  }, [listData, toast]);
+  }, [listLink, toast]);
 
   useEffect(() => {
     const pending = draft.items.filter(
