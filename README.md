@@ -34,6 +34,7 @@ No backend: every shared result or list lives entirely in the URL, and sorts in 
 ```bash
 bun install
 bun run dev
+bun run test
 bun run build
 ```
 

@@ -16,7 +16,8 @@ export const rankGroups = (groups: string[][], items: Item[]): RankedGroup[] => 
   });
 };
 
-const withImage = (item: Item) => [item.label, item.image, item.media].filter(Boolean).join(' | ');
+const withImage = (item: Item) =>
+  [item.label.replace(/\|/g, '\\|'), item.image, item.media].filter(Boolean).join(' | ');
 
 export const toEditorText = (items: Item[], groups?: string[][]) =>
   groups

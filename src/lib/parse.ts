@@ -16,6 +16,7 @@ export type ParseResult = {
 
 type Line = ParsedItem & {
   rank?: number;
+  plain?: ParsedItem;
   bareUrl?: boolean;
   collection?: 'youtube' | 'spotify';
 };
@@ -29,7 +30,7 @@ const MD_IMAGE = /!\[([^\]]*)\]\(<?([^)\s>]+)>?[^)]*\)/;
 const MD_LINK = /\[((?:\\.|[^\]\\])+)\]\(<?([^)\s>]+)>?[^)]*\)/g;
 const HEADING = /^#{1,6}\s+(.+)$/;
 const RANK =
-  /^(?:(?:#|no\.?\s*|rank\s*)(\d{1,4})\s+|(\d{1,4})(?:st|nd|rd|th)?(?:\s*[.):：、]|\s*位|\s+[-–—]\s+|\t)\s*)(.+)$/i;
+  /^(?:(?:#|no\.?\s*|rank\s*)(\d{1,4})\s+|(\d{1,4})(?:(?:st|nd|rd|th)\s+|(?:st|nd|rd|th)?(?:\s*[.):：、]|\s*位|\s+[-–—]\s+|\t)\s*))(.+)$/i;
 const BULLET = /^(?:[-*+•·▪◦●○►▶]|\[[ xX]\])\s+/;
 const NUMERIC = /^(?:#|no\.?\s*)?\d{1,4}(?:st|nd|rd|th|位|\.)?$/i;
 const SEPARATOR_ROW = /^\|?[\s:|-]+\|?$/;
@@ -152,7 +153,9 @@ const parseLine = (raw: string): Line | undefined => {
   const ranked = line.match(RANK);
   if (ranked) {
     const item = splitLabelAndImage(ranked[3].replace(BULLET, ''));
-    return item && { ...item, rank: Number(ranked[1] ?? ranked[2]) };
+    return (
+      item && { ...item, rank: Number(ranked[1] ?? ranked[2]), plain: splitLabelAndImage(line) }
+    );
   }
   return splitLabelAndImage(line);
 };
@@ -267,7 +270,8 @@ export const parseInput = (text: string): ParseResult => {
     if (line.collection === 'youtube') return void playlists.push(line.label);
     if (line.collection === 'spotify') return void spotifyCollections.push(line.label);
     if (line.bareUrl && isRankedList) return;
-    const id = add({ label: line.label, image: line.image, media: line.media });
+    const source = !isRankedList && line.plain ? line.plain : line;
+    const id = add({ label: source.label, image: source.image, media: source.media });
     if (isRankedList && line.rank !== undefined && !textRanks.has(id)) textRanks.set(id, line.rank);
   });
 
