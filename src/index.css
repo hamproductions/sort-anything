@@ -406,7 +406,6 @@ button.media-thumb-button:hover:not(:disabled) {
   pointer-events: none;
 }
 
-.playing-spotify .media-stage,
 .playing-audio .media-stage {
   aspect-ratio: auto;
   background: transparent;
@@ -738,19 +737,6 @@ button.media-thumb-button:hover:not(:disabled) {
   display: contents;
 }
 
-.side.playing-spotify .side-media {
-  inset: 14px 46px auto 14px;
-  height: 152px;
-  z-index: 2;
-  background: transparent;
-  pointer-events: auto;
-  container-type: normal;
-}
-
-.side-right.playing-spotify .side-media {
-  inset: 14px 14px auto 46px;
-}
-
 .surface-video {
   position: absolute;
   top: 50%;
@@ -776,8 +762,15 @@ button.media-thumb-button:hover:not(:disabled) {
   display: block;
   width: 100%;
   height: 152px;
-  border: 0;
   border-radius: var(--radius-m);
+  overflow: hidden;
+}
+
+.surface-spotify iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .surface-spotify.compact {
@@ -1233,16 +1226,6 @@ button.tie.flash {
 
   .side-right .side-pick {
     padding: 52px 20px 20px;
-  }
-
-  .side.playing-spotify .side-media,
-  .side-right.playing-spotify .side-media {
-    inset: 50px 12px auto 12px;
-    height: 80px;
-  }
-
-  .side.playing-spotify .surface-spotify {
-    height: 80px;
   }
 
   .side-tools {
@@ -2323,4 +2306,64 @@ textarea {
   .topbar-actions {
     gap: 0;
   }
+}
+
+.media-stage .surface-video,
+.media-stage .surface-spotify {
+  z-index: 0;
+}
+
+.media-stage .surface-spotify {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+
+.media-stage .stage-fill {
+  position: absolute;
+  inset: -30px;
+  width: calc(100% + 60px);
+  height: calc(100% + 60px);
+  z-index: 1;
+}
+
+.media-stage .stage-cover {
+  position: absolute;
+  z-index: 2;
+}
+
+.media-stage .stage-cover:not(.is-square) {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.media-stage .stage-cover.is-square {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: auto;
+  height: 100%;
+}
+
+.media-stage .stage-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+}
+
+.playing-youtube:not(.show-cover) .media-stage .stage-fill,
+.playing-youtube:not(.show-cover) .media-stage .stage-cover {
+  opacity: 0;
+}
+
+.show-cover .media-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #0d0f1f;
 }

@@ -1,5 +1,6 @@
 import { parseMedia } from '~/lib/media';
 import { YT_ENDED, loadYouTubeApi } from '~/lib/youtube-api';
+import { createSpotifyController } from '~/lib/spotify-api';
 import type { YTPlayer } from '~/lib/youtube-api';
 
 export type Song = {
@@ -132,8 +133,57 @@ const createAudio = (url: string, start?: number): Song => {
   };
 };
 
+const createSpotify = async (host: HTMLElement, uri: string): Promise<Song> => {
+  const controller = await createSpotifyController(host, uri, 152);
+  let duration = 0;
+  let seekPending = false;
+  let active = false;
+  let muted = false;
+  let lastPosition = 0;
+  controller.addListener('playback_update', ({ data }) => {
+    duration = data.duration / 1000;
+    const ended =
+      data.duration > 0 &&
+      (data.position >= data.duration - 250 ||
+        (data.isPaused && data.position === 0 && lastPosition > data.duration - 1500));
+    lastPosition = data.position;
+    if (ended && active && !muted) {
+      controller.seek(0);
+      controller.resume();
+    }
+    if (seekPending && duration > 0) {
+      seekPending = false;
+      if (duration > 60) controller.seek(Math.floor(duration * HOOK_FRACTION));
+    }
+  });
+  return {
+    start: () => {
+      active = true;
+      seekPending = true;
+      if (!muted) controller.play();
+    },
+    stop: () => {
+      active = false;
+      controller.pause();
+    },
+    pause: () => controller.pause(),
+    resume: () => {
+      if (!muted) controller.resume();
+    },
+    setMuted: (next) => {
+      muted = next;
+      if (next) controller.pause();
+      else if (active) controller.resume();
+    },
+    destroy: () => controller.destroy()
+  };
+};
+
 export const createSong = async (host: HTMLElement | null, url: string | undefined) => {
   const media = parseMedia(url);
+  if (media?.kind === 'spotify' && media.type === 'track' && host) {
+    return createSpotify(host, `spotify:track:${media.id}`);
+  }
   if (media?.kind === 'youtube' && host) return createYouTube(host, media.id, media.start);
   if (media?.kind === 'audio') return createAudio(media.url, media.start);
   return undefined;

@@ -39,7 +39,7 @@ const toEntry = async (item: Item, rank: number): Promise<RecapEntry> => {
     rank,
     label: item.label,
     video: media?.kind === 'youtube',
-    song: media?.kind === 'youtube' || media?.kind === 'audio'
+    song: !!media && (media.kind !== 'spotify' || media.type === 'track')
   };
   if (item.image) return { ...base, image: item.image };
   if (!media) return base;

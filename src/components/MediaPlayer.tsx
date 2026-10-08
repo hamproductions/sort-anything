@@ -17,6 +17,8 @@ import {
 } from '~/lib/media';
 import type { Media, MediaInfo } from '~/lib/media';
 import { YT_ENDED, YT_PLAYING, loadYouTubeApi } from '~/lib/youtube-api';
+import { createSpotifyController } from '~/lib/spotify-api';
+import type { SpotifyController } from '~/lib/spotify-api';
 import type { YTPlayer } from '~/lib/youtube-api';
 import type { Item } from '~/lib/types';
 
@@ -216,20 +218,74 @@ const AudioSurface = ({
   );
 };
 
+const SpotifySurface = ({
+  media,
+  itemKey,
+  compact
+}: {
+  media: Extract<Media, { kind: 'spotify' }>;
+  itemKey: string;
+  compact?: boolean;
+}) => {
+  const { report, register, stop } = usePlayer();
+  const hostRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    let controller: SpotifyController | undefined;
+    let cancelled = false;
+    let duration = 0;
+    void createSpotifyController(
+      host,
+      `spotify:${media.type}:${media.id}`,
+      compact ? 80 : 152
+    ).then((created) => {
+      if (cancelled) return created.destroy();
+      controller = created;
+      let wanted = true;
+      let lastPosition = 0;
+      created.addListener('playback_update', ({ data }) => {
+        duration = data.duration / 1000;
+        report(itemKey, { paused: data.isPaused, time: data.position / 1000, duration });
+        const ended =
+          data.duration > 0 &&
+          (data.position >= data.duration - 250 ||
+            (data.isPaused && data.position === 0 && lastPosition > data.duration - 1500));
+        lastPosition = data.position;
+        if (ended && wanted) {
+          created.seek(0);
+          created.resume();
+        }
+      });
+      register(itemKey, {
+        toggle: () => {
+          wanted = !wanted;
+          created.togglePlay();
+        },
+        seek: (fraction) => {
+          if (duration) created.seek(duration * fraction);
+        }
+      });
+      created.play();
+    });
+    return () => {
+      cancelled = true;
+      controller?.destroy();
+      host.replaceChildren();
+    };
+  }, [media.type, media.id, compact, itemKey, report, register, stop]);
+
+  return <div className={`surface-spotify${compact ? ' compact' : ''}`} ref={hostRef} />;
+};
+
 export const MediaSurface = ({ item, compact }: { item: Item; compact?: boolean }) => {
   const media = parseMedia(item.media);
   const key = playerKey(item);
   if (!media) return null;
   if (media.kind === 'youtube') return <YouTubeSurface key={key} media={media} itemKey={key} />;
   if (media.kind === 'audio') return <AudioSurface key={key} media={media} itemKey={key} />;
-  return (
-    <iframe
-      className={`surface-spotify${compact ? ' compact' : ''}`}
-      src={`https://open.spotify.com/embed/${media.type}/${media.id}?utm_source=generator`}
-      title="Spotify player"
-      allow="autoplay; clipboard-write; encrypted-media"
-    />
-  );
+  return <SpotifySurface key={key} media={media} itemKey={key} compact={compact} />;
 };
 
 export const useMediaInfo = (url: string | undefined) => {
@@ -397,7 +453,8 @@ export const MediaThumb = ({ item, className }: { item: Item; className?: string
   const { toggle } = usePlayer();
   const { active } = useItemPlayback(item);
   const cover = useCoverVisible(item);
-  const square = isArtTrack(useMediaInfo(active && !item.image ? item.media : undefined));
+  const info = useMediaInfo(active && !item.image ? item.media : undefined);
+  const square = parseMedia(item.media)?.kind === 'spotify' || isArtTrack(info);
   const media = parseMedia(item.media);
   const src = useItemImage(item, 'small');
   const large = useItemImage(item, 'large');
@@ -411,13 +468,13 @@ export const MediaThumb = ({ item, className }: { item: Item; className?: string
       >
         <div className="media-stage">
           <MediaSurface item={item} compact />
-          {media.kind !== 'spotify' && large && (
+          {large && (
             <>
               <Thumb className="stage-fill" src={large} />
               <Thumb className={`stage-cover${square ? ' is-square' : ''}`} src={large} />
             </>
           )}
-          {media.kind !== 'spotify' && <ProgressStrip item={item} className="stage-progress" />}
+          <ProgressStrip item={item} className="stage-progress" />
         </div>
         <PlaybackButtons item={item} className="stage-buttons" />
       </div>

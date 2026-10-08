@@ -36,7 +36,9 @@ const Side = ({
   const { playingKey } = usePlayer();
   const coverItem = items.find((item) => item.image || item.media);
   const image = useItemImage(coverItem);
-  const square = isArtTrack(useMediaInfo(coverItem?.image ? undefined : coverItem?.media));
+  const coverUrl = coverItem?.image ? undefined : coverItem?.media;
+  const coverInfo = useMediaInfo(coverUrl);
+  const square = parseMedia(coverUrl)?.kind === 'spotify' || isArtTrack(coverInfo);
   const playingItem = items.find((item) => playingKey === playerKey(item));
   const media = parseMedia(playingItem?.media);
   const cover = useCoverVisible(playingItem);
@@ -73,9 +75,7 @@ const Side = ({
             <kbd>{side === 'left' ? '←' : '→'}</kbd>
           </span>
         </button>
-        {playingItem && media?.kind !== 'spotify' && (
-          <ProgressStrip item={playingItem} className="side-progress" />
-        )}
+        {playingItem && <ProgressStrip item={playingItem} className="side-progress" />}
       </div>
       <div className="side-tools">
         {items.map((item) => (
