@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * { margin: 0; }
+      html, body { width: 512px; height: 512px; background: transparent; }
+      .icon {
+        width: 512px;
+        height: 512px;
+        border-radius: 112px;
+        overflow: hidden;
+        position: relative;
+        background: #2e5bff;
+      }
+      .icon::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: #f0306f;
+        clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="icon"></div>
+  </body>
+</html>

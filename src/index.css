@@ -2481,3 +2481,23 @@ textarea {
     display: none;
   }
 }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.wordmark .wordmark-a {
+  background: #2e5bff;
+}
+
+.wordmark .wordmark-b {
+  background: #d81b60;
+}

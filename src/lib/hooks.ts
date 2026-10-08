@@ -57,3 +57,11 @@ export const useHotkeys = (handler: (event: KeyboardEvent) => void, enabled = tr
     return () => window.removeEventListener('keydown', listener);
   }, [handler, enabled]);
 };
+
+const DEFAULT_TITLE = 'Sort Anything: rank any list by picking between two';
+
+export const useDocumentTitle = (title?: string) => {
+  useEffect(() => {
+    document.title = title?.trim() ? `${title.trim()} – Sort Anything` : DEFAULT_TITLE;
+  }, [title]);
+};

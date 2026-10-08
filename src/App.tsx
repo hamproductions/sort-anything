@@ -33,8 +33,7 @@ export const App = () => {
         <div className="shell">
           <header className="topbar">
             <a className="wordmark" href="#/" aria-label="Sort Anything home">
-              <span className="wordmark-a">Sort</span>
-              <span className="wordmark-b">Anything</span>
+              <span className="wordmark-a">Sort</span> <span className="wordmark-b">Anything</span>
             </a>
             <nav className="topbar-actions">
               <a

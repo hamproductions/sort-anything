@@ -3,9 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Paste a list, pick favorites two at a time, share the ranking." />
+    <title>Sort Anything: rank any list by picking between two</title>
+    <meta
+      name="description"
+      content="Paste any list, pick your favorite of each pair, and get a full ranking you can share. Works with numbered lists from Discord, YouTube and Spotify songs, and playlists. Free, no sign-up."
+    />
+    <link rel="canonical" href="https://hamproductions.github.io/sort-anything/" />
     <meta name="theme-color" content="#2e5bff" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='16' height='32' fill='%232e5bff'/%3E%3Crect x='16' width='16' height='32' fill='%23f0306f'/%3E%3C/svg%3E" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Sort Anything" />
+    <meta property="og:title" content="Sort Anything: rank any list by picking between two" />
+    <meta
+      property="og:description"
+      content="Paste a list, pick your favorites two at a time, and share the ranking. Songs play right in the cards."
+    />
+    <meta property="og:url" content="https://hamproductions.github.io/sort-anything/" />
+    <meta property="og:image" content="https://hamproductions.github.io/sort-anything/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Sort Anything: a blue card and a pink card facing off, with the headline Rank anything by picking between two"
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Sort Anything: rank any list by picking between two" />
+    <meta
+      name="twitter:description"
+      content="Paste a list, pick your favorites two at a time, and share the ranking."
+    />
+    <meta name="twitter:image" content="https://hamproductions.github.io/sort-anything/og.png" />
+
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -13,10 +45,32 @@
       rel="stylesheet"
       crossorigin="anonymous"
     />
-    <title>Sort Anything</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Sort Anything",
+        "url": "https://hamproductions.github.io/sort-anything/",
+        "description": "Rank any list by picking your favorite of each pair. Paste lists, rankings, YouTube and Spotify links, then share the result.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "isAccessibleForFree": true,
+        "image": "https://hamproductions.github.io/sort-anything/og.png",
+        "inLanguage": "en"
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>Sort Anything: rank any list by picking between two</h1>
+      <p>
+        Paste a list of anything, pick your favorite of each pair, and get a full ranking you can
+        copy into Discord or share as a link. It reads numbered rankings, YouTube and Spotify links
+        and playlists, and plays songs inside each card. Sort Anything needs JavaScript to run.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

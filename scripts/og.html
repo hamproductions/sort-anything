@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700..800&family=Instrument+Sans:wght@500..700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1200px; height: 630px; }
+      body {
+        background: #12152a;
+        color: #fff;
+        font-family: 'Instrument Sans', sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+      .card {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 270px;
+        display: flex;
+        align-items: flex-end;
+        padding: 0 0 36px;
+      }
+      .left {
+        right: 345px;
+        background: #2e5bff;
+        clip-path: polygon(0 0, 100% 0, calc(100% - 34px) 100%, 0 100%);
+        padding-left: 30px;
+      }
+      .right {
+        right: 0;
+        width: 380px;
+        background: #f0306f;
+        clip-path: polygon(34px 0, 100% 0, 100% 100%, 0 100%);
+        justify-content: flex-end;
+        padding-right: 40px;
+      }
+      .label {
+        font-family: 'Bricolage Grotesque', sans-serif;
+        font-weight: 800;
+        font-size: 44px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+      .vs {
+        position: absolute;
+        right: 345px;
+        top: 50%;
+        translate: 50% -50%;
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        background: #12152a;
+        border: 5px solid #f2f4f7;
+        display: grid;
+        place-items: center;
+        font-family: 'Bricolage Grotesque', sans-serif;
+        font-weight: 800;
+        font-size: 32px;
+      }
+      .text {
+        position: absolute;
+        left: 72px;
+        top: 76px;
+        width: 470px;
+        max-width: 470px;
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+      }
+      .mark { display: inline-flex; border-radius: 10px; overflow: hidden; align-self: flex-start; }
+      .mark span {
+        font-family: 'Bricolage Grotesque', sans-serif;
+        font-weight: 800;
+        font-size: 34px;
+        padding: 6px 16px;
+      }
+      .mark span:first-child { background: #2e5bff; }
+      .mark span:last-child { background: #f0306f; }
+      h1 {
+        font-family: 'Bricolage Grotesque', sans-serif;
+        font-weight: 800;
+        font-size: 66px;
+        line-height: 0.98;
+        letter-spacing: -0.035em;
+      }
+      p { font-size: 26px; line-height: 1.35; color: #c3c8de; }
+    </style>
+  </head>
+  <body>
+    <div class="text">
+      <div class="mark"><span>Sort</span><span>Anything</span></div>
+      <h1>Rank anything by picking between two.</h1>
+      <p>Paste a list, pick your favorites, share the ranking. Songs play right in the cards.</p>
+    </div>
+    <div class="card left"><span class="label">Pizza</span></div>
+    <div class="card right"><span class="label">Tacos</span></div>
+    <div class="vs">vs</div>
+  </body>
+</html>

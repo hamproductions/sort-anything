@@ -1,0 +1,14 @@
+{
+  "name": "Sort Anything",
+  "short_name": "Sort Anything",
+  "description": "Rank any list by picking between two.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#12152a",
+  "theme_color": "#2e5bff",
+  "icons": [
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ClipboardEvent, DragEvent } from 'react';
-import { navigate, usePersistentState } from '~/lib/hooks';
+import { navigate, useDocumentTitle, usePersistentState } from '~/lib/hooks';
 import { parseInput } from '~/lib/parse';
 import { decodeList } from '~/lib/share';
 import { calculateMaxComparisons } from '~/lib/merge-sort';
@@ -57,6 +57,7 @@ export const EditorPage = ({ listData }: { listData?: string }) => {
   const [spotifyHint, setSpotifyHint] = useState(false);
   const [dragging, setDragging] = useState(false);
   const resolved = useRef(new Set<string>());
+  useDocumentTitle(draft.title);
   const loadedLink = useRef<string>(undefined);
 
   useEffect(() => {
@@ -220,6 +221,7 @@ export const EditorPage = ({ listData }: { listData?: string }) => {
         if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) start();
       }}
     >
+      <h1 className="sr-only">Rank any list by picking between two</h1>
       <div className="workspace-bar">
         <input
           className="title-input"

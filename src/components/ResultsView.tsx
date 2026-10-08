@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { rankGroups, toCsv, toPasteList, toPlainText } from '~/lib/format';
 import { baseUrl, listLink, resultLink, toSharedList } from '~/lib/share';
-import { usePersistentState } from '~/lib/hooks';
+import { useDocumentTitle, usePersistentState } from '~/lib/hooks';
 import type { Item } from '~/lib/types';
 import { useToast } from './Toast';
 import type { RecapStats } from '~/recap/RecapPlayer';
@@ -92,6 +92,7 @@ export const ResultsView = ({
   stats?: RecapStats;
 }) => {
   const toast = useToast();
+  useDocumentTitle(title);
   const captureRef = useRef<HTMLDivElement>(null);
   const [layout, setLayout] = usePersistentState<Layout>('sa:layout', 'list');
   const [adjusting, setAdjusting] = useState(false);
@@ -172,6 +173,7 @@ export const ResultsView = ({
     <div className="results">
       <div className="results-capture" ref={captureRef}>
         <div className="results-head">
+          {onTitleChange && <h1 className="sr-only">{title}</h1>}
           {onTitleChange ? (
             <input
               className="results-title-input"

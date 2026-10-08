@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { navigate, useHotkeys } from '~/lib/hooks';
+import { navigate, useDocumentTitle, useHotkeys } from '~/lib/hooks';
 import { estimateRemaining, getPair, getProgress } from '~/lib/engine';
 import type { Choice } from '~/lib/merge-sort';
 import { applyChoice, applyDrop, applyUndo } from '~/lib/session';
@@ -92,6 +92,7 @@ export const SorterPage = ({ id }: { id: string }) => {
   const [exiting, setExiting] = useState<Choice>();
   const pending = useRef<{ choice: Choice; ms: number; timer: number }>(undefined);
   const { toggle, stop } = usePlayer();
+  useDocumentTitle(session ? `Sorting ${session.title}` : undefined);
 
   useEffect(() => {
     if (!session) return;
