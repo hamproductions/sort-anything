@@ -7,12 +7,15 @@ import { SorterPage } from './pages/SorterPage';
 import { SessionResultsPage } from './pages/SessionResultsPage';
 import { SharedResultsPage } from './pages/SharedResultsPage';
 import { HelpPage } from './pages/HelpPage';
+import { AboutDialog } from './components/AboutDialog';
+import { useState } from 'react';
 
 const THEME_LABEL = { system: 'Auto', light: 'Light', dark: 'Dark' };
 
 export const App = () => {
   const { name, param } = useHashRoute();
   const { theme, cycle } = useTheme();
+  const [about, setAbout] = useState(false);
 
   const page =
     name === 's' && param ? (
@@ -50,6 +53,23 @@ export const App = () => {
               </a>
               <RankingsMenu route={`${name}/${param}`} />
               <button
+                className="ghost small about-button"
+                onClick={() => setAbout(true)}
+                aria-haspopup="dialog"
+                aria-label="About"
+              >
+                <span className="wide-only">About</span>
+                <svg className="narrow-only" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <path
+                    d="M12 11v6M12 7.5v.5"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+              <button
                 className="icon-button theme-button"
                 onClick={cycle}
                 title={`Color theme: ${THEME_LABEL[theme]}. Click to change.`}
@@ -64,6 +84,7 @@ export const App = () => {
             </nav>
           </header>
           <main className="page">{page}</main>
+          {about && <AboutDialog onClose={() => setAbout(false)} />}
         </div>
       </PlayerProvider>
     </ToastProvider>

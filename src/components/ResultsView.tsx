@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { rankGroups, toCsv, toPasteList, toPlainText } from '~/lib/format';
+import { moveInRanking, rankGroups, toCsv, toPasteList, toPlainText } from '~/lib/format';
 import { baseUrl, listLink, resultLink, toSharedList } from '~/lib/share';
 import { useDocumentTitle, usePersistentState } from '~/lib/hooks';
 import type { Item } from '~/lib/types';
@@ -9,6 +9,7 @@ import type { RecapStats } from '~/recap/RecapPlayer';
 import { QrSvg, useQr } from './QrCode';
 import type { Qr } from '~/lib/qr';
 import { MediaThumb, Thumb, useItemImage } from './MediaPlayer';
+import { DragHandle, SortableList, useSortableRow } from './Sortable';
 
 const RecapPlayer = lazy(() =>
   import('~/recap/RecapPlayer').then((module) => ({ default: module.RecapPlayer }))
@@ -25,30 +26,6 @@ const TileImage = ({ item }: { item: Item }) => {
 };
 
 type Layout = 'list' | 'grid';
-
-const moveUp = (groups: string[][], id: string) => {
-  const gi = groups.findIndex((g) => g.includes(id));
-  const next = groups.map((g) => [...g]);
-  if (next[gi].length > 1) {
-    next[gi] = next[gi].filter((x) => x !== id);
-    next.splice(gi, 0, [id]);
-  } else if (gi > 0) {
-    [next[gi - 1], next[gi]] = [next[gi], next[gi - 1]];
-  }
-  return next;
-};
-
-const moveDown = (groups: string[][], id: string) => {
-  const gi = groups.findIndex((g) => g.includes(id));
-  const next = groups.map((g) => [...g]);
-  if (next[gi].length > 1) {
-    next[gi] = next[gi].filter((x) => x !== id);
-    next.splice(gi + 1, 0, [id]);
-  } else if (gi < next.length - 1) {
-    [next[gi], next[gi + 1]] = [next[gi + 1], next[gi]];
-  }
-  return next;
-};
 
 const tieWithAbove = (groups: string[][], id: string) => {
   const gi = groups.findIndex((g) => g.includes(id));
@@ -334,60 +311,46 @@ export const ResultsView = ({
             )}
           </ol>
         ) : (
-          <ol className="rank-list">
-            {ranked.map(({ rank, items }, gi) => (
-              <li
-                key={gi}
-                className={`reveal-row${rank <= 3 ? ` top top-${rank}` : ''}`}
-                style={
-                  { '--i': Math.max(0, Math.min(14, ranked.length - 1 - gi)) } as CSSProperties
-                }
-              >
-                <span className="rank-num" aria-label={`Rank ${rank}`}>
-                  {rank}
-                </span>
-                <div className="rank-items">
-                  {items.map((item) => (
-                    <div key={item.id} className="rank-item">
-                      {item.image || item.media ? (
-                        <MediaThumb item={item} />
-                      ) : (
-                        hasImages && <span className="media-thumb thumb-placeholder" />
-                      )}
-                      <span className="rank-label">{item.label}</span>
-                      {items.length > 1 && <span className="tag tie-tag">tie</span>}
-                      {adjusting && onGroupsChange && (
-                        <span className="adjust" data-no-capture>
-                          <button
-                            className="ghost small"
-                            onClick={() => onGroupsChange(moveUp(groups, item.id))}
-                            aria-label={`Move ${item.label} up`}
-                          >
-                            Up
-                          </button>
-                          <button
-                            className="ghost small"
-                            onClick={() => onGroupsChange(moveDown(groups, item.id))}
-                            aria-label={`Move ${item.label} down`}
-                          >
-                            Down
-                          </button>
-                          {gi > 0 && (
-                            <button
-                              className="ghost small"
-                              onClick={() => onGroupsChange(tieWithAbove(groups, item.id))}
-                            >
-                              Tie with above
-                            </button>
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </li>
-            ))}
-          </ol>
+          <SortableList
+            ids={ranked.flatMap(({ items }) => items.map((item) => item.id))}
+            onMove={(from, to) =>
+              onGroupsChange?.(
+                moveInRanking(groups, ranked.flatMap(({ items }) => items)[from].id, to)
+              )
+            }
+          >
+            <ol className="rank-list">
+              {ranked.map(({ rank, items }, gi) => (
+                <li
+                  key={gi}
+                  className={`reveal-row${rank <= 3 ? ` top top-${rank}` : ''}`}
+                  style={
+                    { '--i': Math.max(0, Math.min(14, ranked.length - 1 - gi)) } as CSSProperties
+                  }
+                >
+                  <span className="rank-num" aria-label={`Rank ${rank}`}>
+                    {rank}
+                  </span>
+                  <div className="rank-items">
+                    {items.map((item) => (
+                      <RankItem
+                        key={item.id}
+                        item={item}
+                        tied={items.length > 1}
+                        placeholder={hasImages}
+                        adjusting={adjusting && !!onGroupsChange}
+                        onTieWithAbove={
+                          gi > 0 && onGroupsChange
+                            ? () => onGroupsChange(tieWithAbove(groups, item.id))
+                            : undefined
+                        }
+                      />
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </SortableList>
         )}
         <div className="results-foot">
           {qr && (
@@ -488,6 +451,41 @@ const QrDialog = ({
           </button>
         </div>
       </div>
+    </div>
+  );
+};
+
+const RankItem = ({
+  item,
+  tied,
+  placeholder,
+  adjusting,
+  onTieWithAbove
+}: {
+  item: Item;
+  tied: boolean;
+  placeholder: boolean;
+  adjusting: boolean;
+  onTieWithAbove?: () => void;
+}) => {
+  const { setNodeRef, style, isDragging, handle } = useSortableRow(item.id);
+  return (
+    <div ref={setNodeRef} style={style} className={`rank-item${isDragging ? ' dragging' : ''}`}>
+      {adjusting && <DragHandle label={`Move ${item.label}`} handle={handle} />}
+      {item.image || item.media ? (
+        <MediaThumb item={item} />
+      ) : (
+        placeholder && <span className="media-thumb thumb-placeholder" />
+      )}
+      <span className="rank-label">{item.label}</span>
+      {tied && <span className="tag tie-tag">tie</span>}
+      {adjusting && onTieWithAbove && (
+        <span className="adjust" data-no-capture>
+          <button className="ghost small" onClick={onTieWithAbove}>
+            Tie with above
+          </button>
+        </span>
+      )}
     </div>
   );
 };

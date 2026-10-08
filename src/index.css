@@ -240,6 +240,7 @@ button[aria-pressed='true'] {
 
 .topbar {
   display: flex;
+  gap: 8px;
   justify-content: space-between;
   align-items: center;
   width: 100%;
@@ -1550,12 +1551,11 @@ textarea {
   border-top: 0;
 }
 
-.item-row.dragging {
-  opacity: 0.4;
-}
-
-.item-row.drop-target {
-  box-shadow: inset 0 3px 0 var(--p1);
+.item-row.dragging,
+.rank-item.dragging {
+  background: var(--surface);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+  border-radius: var(--radius-s);
 }
 
 .item-main {
@@ -1567,14 +1567,28 @@ textarea {
 }
 
 .drag-handle {
-  width: 22px;
-  height: 32px;
+  width: 26px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: none;
   display: grid;
   place-items: center;
   color: var(--muted);
   cursor: grab;
+  touch-action: none;
   opacity: 0.5;
   flex: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-handle:hover:not(:disabled),
+.drag-handle:focus-visible {
+  background: none;
+  opacity: 1;
 }
 
 .drag-handle svg {
@@ -1796,10 +1810,6 @@ textarea {
 
   .item-main {
     padding-right: 6px;
-  }
-
-  .drag-handle {
-    display: none;
   }
 
   .item-row .media-thumb.is-playing {
@@ -2539,7 +2549,8 @@ textarea {
   color: var(--ink);
 }
 
-.qr-backdrop {
+.qr-backdrop,
+.modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 90;
@@ -2574,4 +2585,62 @@ textarea {
 
 .qr-actions {
   justify-content: center;
+}
+
+.about-panel {
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  background: var(--surface);
+  border-radius: var(--radius-l);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.about-panel h2 {
+  font-family: var(--display);
+  font-size: 1.4rem;
+}
+
+.about-panel h3 {
+  font-size: 0.95rem;
+  margin-top: 8px;
+}
+
+.about-panel ul {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 1.2em;
+  color: var(--muted);
+}
+
+.about-actions {
+  margin-top: 10px;
+}
+
+.github-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.about-button svg {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+@media (max-width: 480px) {
+  .topbar .about-button {
+    padding-inline: 6px;
+  }
+}
+
+@media (hover: none) {
+  .drag-handle {
+    opacity: 0.85;
+  }
 }

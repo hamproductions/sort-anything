@@ -84,3 +84,20 @@ export const formatRelative = (time: number) => {
   if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)} h ago`;
   return new Date(time).toLocaleDateString();
 };
+
+export const moveInRanking = (groups: string[][], id: string, to: number) => {
+  const flat = groups.flat();
+  const from = flat.indexOf(id);
+  if (from < 0 || from === to) return groups;
+  const order = [...flat];
+  order.splice(to, 0, ...order.splice(from, 1));
+  const groupOf = new Map(groups.flatMap((group, gi) => group.map((x) => [x, gi] as const)));
+  const next: string[][] = [];
+  order.forEach((x, i) => {
+    const prev = order[i - 1];
+    const tied = i > 0 && x !== id && prev !== id && groupOf.get(prev) === groupOf.get(x);
+    if (tied) next[next.length - 1].push(x);
+    else next.push([x]);
+  });
+  return next;
+};

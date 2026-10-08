@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rankGroups, toCsv, toEditorText, toPasteList, toPlainText } from './format';
+import { moveInRanking, rankGroups, toCsv, toEditorText, toPasteList, toPlainText } from './format';
 import { parseInput } from './parse';
 import type { Item } from './types';
 
@@ -95,5 +95,27 @@ describe('toCsv', () => {
   it('quotes every field and escapes quotes', () => {
     const csv = toCsv(rankGroups([['0']], [{ id: '0', label: 'Say "hi", ok' }]));
     expect(csv).toBe('rank,item,image,media\n"1","Say ""hi"", ok","",""');
+  });
+});
+
+describe('moveInRanking', () => {
+  const groups = [['a'], ['b', 'c'], ['d'], ['e']];
+
+  it('moves an item to a new place and keeps other ties', () => {
+    expect(moveInRanking(groups, 'e', 0)).toEqual([['e'], ['a'], ['b', 'c'], ['d']]);
+    expect(moveInRanking(groups, 'a', 4)).toEqual([['b', 'c'], ['d'], ['e'], ['a']]);
+  });
+
+  it('takes a tied item out of its tie', () => {
+    expect(moveInRanking(groups, 'c', 0)).toEqual([['c'], ['a'], ['b'], ['d'], ['e']]);
+    expect(moveInRanking(groups, 'b', 3)).toEqual([['a'], ['c'], ['d'], ['b'], ['e']]);
+  });
+
+  it('does not join a tie when dropped inside one', () => {
+    expect(moveInRanking(groups, 'e', 2)).toEqual([['a'], ['b'], ['e'], ['c'], ['d']]);
+  });
+
+  it('leaves the ranking alone when nothing moves', () => {
+    expect(moveInRanking(groups, 'd', 3)).toBe(groups);
   });
 });

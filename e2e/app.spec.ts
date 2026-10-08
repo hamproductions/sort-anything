@@ -185,6 +185,106 @@ test('share link shows the ranking to someone else', async ({ page, browser }) =
   await friend.close();
 });
 
+const dragHandle = async (page: Page, from: string, to: string) => {
+  const source = await page
+    .getByRole('button', { name: `Move ${from}`, exact: true })
+    .boundingBox();
+  const target = await page.getByRole('button', { name: `Move ${to}`, exact: true }).boundingBox();
+  await page.mouse.move(source!.x + source!.width / 2, source!.y + source!.height / 2);
+  await page.mouse.down();
+  for (let i = 1; i <= 10; i++) {
+    await page.mouse.move(
+      source!.x + source!.width / 2,
+      source!.y + ((target!.y - source!.y) * i) / 10 + source!.height / 2
+    );
+  }
+  await page.mouse.up();
+  await page.waitForTimeout(100);
+};
+
+test('items reorder by dragging the handle and by keyboard', async ({ page }) => {
+  await page.goto('./');
+  await pasteList(page, 'One\nTwo\nThree\nFour');
+  await dragHandle(page, 'Four', 'One');
+  await expect.poll(() => listLabels(page)).toEqual(['Four', 'One', 'Two', 'Three']);
+
+  await page.getByRole('button', { name: 'Move One', exact: true }).focus();
+  for (const key of ['Space', 'ArrowDown', 'ArrowDown', 'Space']) {
+    await page.keyboard.press(key);
+    await page.waitForTimeout(150);
+  }
+  await expect.poll(() => listLabels(page)).toEqual(['Four', 'Two', 'Three', 'One']);
+});
+
+test('items reorder by touch on a phone', async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    hasTouch: true,
+    isMobile: true
+  });
+  const page = await context.newPage();
+  await page.goto('./');
+  await pasteList(page, 'One\nTwo\nThree\nFour');
+  const source = await page.getByRole('button', { name: 'Move Four', exact: true }).boundingBox();
+  const target = await page.getByRole('button', { name: 'Move One', exact: true }).boundingBox();
+  const x = source!.x + source!.width / 2;
+  const fromY = source!.y + source!.height / 2;
+  const toY = target!.y + target!.height / 2;
+  const cdp = await context.newCDPSession(page);
+  const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', y: number) =>
+    cdp.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: type === 'touchEnd' ? [] : [{ x, y }]
+    });
+  await touch('touchStart', fromY);
+  for (let i = 1; i <= 10; i++) await touch('touchMove', fromY + ((toY - fromY) * i) / 10);
+  await touch('touchEnd', toY);
+  await expect.poll(() => listLabels(page)).toEqual(['Four', 'One', 'Two', 'Three']);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await context.close();
+});
+
+test('adjust order drags a result into place and breaks it out of a tie', async ({ page }) => {
+  await page.goto('./');
+  await pasteList(page, 'A\nB\nC\nD');
+  await page.evaluate(() => localStorage.setItem('sa:shuffle', 'false'));
+  await page.getByRole('button', { name: 'Start sorting' }).click();
+  await expect(page.locator('.faceoff')).toBeVisible();
+  const order = ['A', 'B', 'C', 'D'];
+  for (let i = 0; i < 20 && !page.url().includes('#/done/'); i++) {
+    const left = await page.locator('.side-left .side-label').first().textContent();
+    const right = await page.locator('.side-right .side-label').first().textContent();
+    await page.keyboard.press(
+      order.indexOf(left!) < order.indexOf(right!) ? 'ArrowLeft' : 'ArrowRight'
+    );
+    await page.waitForTimeout(260);
+  }
+  await expect(page).toHaveURL(/#\/done\//);
+  expect(await rankedLabels(page)).toEqual(['A', 'B', 'C', 'D']);
+
+  await page.getByRole('button', { name: 'Adjust order' }).click();
+  await dragHandle(page, 'D', 'A');
+  await expect.poll(() => rankedLabels(page)).toEqual(['D', 'A', 'B', 'C']);
+  await page.getByRole('button', { name: 'Tie with above' }).nth(1).click();
+  await expect(page.locator('.rank-list .rank-num')).toHaveText(['1', '2', '4']);
+  await dragHandle(page, 'B', 'D');
+  await expect.poll(() => rankedLabels(page)).toEqual(['B', 'D', 'A', 'C']);
+  await expect(page.locator('.rank-list .rank-num')).toHaveText(['1', '2', '3', '4']);
+});
+
+test('about explains local storage and links to GitHub', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'About' }).click();
+  const dialog = page.getByRole('dialog', { name: 'About Sort Anything' });
+  await expect(dialog).toContainText('saved in this browser only');
+  await expect(dialog.getByRole('link', { name: 'Source code on GitHub' })).toHaveAttribute(
+    'href',
+    'https://github.com/hamproductions/sort-anything'
+  );
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+});
+
 test('the QR code scans to a link that opens the ranking', async ({ page, browser }) => {
   test.setTimeout(120_000);
   await page.goto('./');
