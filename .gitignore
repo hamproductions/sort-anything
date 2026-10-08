@@ -4,3 +4,4 @@ dist
 conductor/
 test-results/
 playwright-report/
+/*.png
