@@ -44,7 +44,8 @@ export const RankingsMenu = ({ route }: { route: string }) => {
           setOpen((o) => !o);
         }}
       >
-        My rankings
+        <span className="wide-only">My rankings</span>
+        <span className="narrow-only">Rankings</span>
         {sessions.length > 0 && <span className="count">{sessions.length}</span>}
         {inProgress > 0 && <span className="dot" title={`${inProgress} in progress`} />}
       </button>

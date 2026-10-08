@@ -42,7 +42,8 @@ export const App = () => {
                 href="#/help"
                 aria-current={name === 'help' ? 'page' : undefined}
               >
-                How to use
+                <span className="wide-only">How to use</span>
+                <span className="narrow-only">Help</span>
               </a>
               <RankingsMenu route={`${name}/${param}`} />
               <button

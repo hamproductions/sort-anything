@@ -53,26 +53,23 @@ const Side = ({
           </div>
         )}
         <button
-          className="side-pick"
+          className={`side-pick${image ? ' has-art' : ''}`}
           onClick={onPick}
           aria-keyshortcuts={side === 'left' ? 'ArrowLeft' : 'ArrowRight'}
           aria-label={`Pick ${items.map((item) => item.label).join(' and ')}`}
         >
           {image && (
-            <>
+            <span className="side-art">
               <Thumb className="side-image-fill" src={image} />
               <Thumb className={`side-image${square ? ' is-square' : ''}`} src={image} />
-            </>
+            </span>
           )}
           <span className="side-labels">
             {items.map((item) => (
-              <span key={item.id} className="side-label">
+              <span key={item.id} className="side-label" title={item.label}>
                 {item.label}
               </span>
             ))}
-          </span>
-          <span className="side-key">
-            <kbd>{side === 'left' ? '←' : '→'}</kbd>
           </span>
         </button>
         {playingItem && <ProgressStrip item={playingItem} className="side-progress" />}
@@ -224,8 +221,6 @@ export const SorterPage = ({ id }: { id: string }) => {
         <span style={{ width: `${progress * 100}%` }} />
       </div>
 
-      <p className="sorter-question">Which do you prefer?</p>
-
       <div className="faceoff" key={pairKey}>
         <Side
           side="left"
@@ -261,16 +256,14 @@ export const SorterPage = ({ id }: { id: string }) => {
           Save and leave <kbd>Esc</kbd>
         </button>
       </div>
-      <p className="muted center small-text">
-        Progress saves automatically on this device. Keys: <kbd>←</kbd> <kbd>→</kbd> pick,{' '}
-        <kbd>↓</kbd> tie, <kbd>↑</kbd> undo. Also <kbd>A</kbd> <kbd>D</kbd> <kbd>S</kbd>{' '}
-        <kbd>W</kbd>.
+      <p className="sorter-hint">
+        <kbd>←</kbd> <kbd>→</kbd> pick, <kbd>↓</kbd> tie, <kbd>↑</kbd> undo
         {hasMedia && (
           <>
-            {' '}
-            <kbd>Q</kbd> <kbd>E</kbd> play the left or right song.
+            , <kbd>Q</kbd> <kbd>E</kbd> play
           </>
         )}
+        . Progress saves on this device.
       </p>
     </div>
   );
