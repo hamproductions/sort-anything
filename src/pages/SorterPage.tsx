@@ -131,7 +131,20 @@ export const SorterPage = ({ id }: { id: string }) => {
     setSession((s) => (s && getPair(s.engine) ? applyChoice(s, current.choice, current.ms) : s));
   }, []);
 
-  useEffect(() => () => window.clearTimeout(pending.current?.timer), []);
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+
+  useEffect(
+    () => () => {
+      const current = pending.current;
+      if (!current) return;
+      window.clearTimeout(current.timer);
+      const latest = sessionRef.current;
+      if (latest && getPair(latest.engine))
+        saveSession(applyChoice(latest, current.choice, current.ms));
+    },
+    []
+  );
 
   const pick = useCallback(
     (choice: Choice) => {

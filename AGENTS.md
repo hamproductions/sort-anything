@@ -27,3 +27,4 @@ Single-context: root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
 
 - The dev server (`bun run dev --port 5199`) stays running between turns. Never stop it while the work is under review; stop only servers started for one-off checks (e.g. a static preview of `dist/`).
 - Unit tests live next to the code (`src/lib/*.test.ts`, Vitest). Run `bun run test` (capped at 2 workers in `vitest.config.ts`); the Pages workflow runs type-check and tests before building, so a failing test blocks deploys.
+- Integration tests are Playwright (`e2e/app.spec.ts`, one worker, mock keychain, muted) against the production build on port 4173: `bun run test:e2e`. They run in the Pages workflow after the unit tests. Wait for the sorter (`.faceoff`) before sending keys.

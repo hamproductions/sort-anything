@@ -204,7 +204,11 @@ export const ResultsView = ({
             </button>
             <button onClick={() => setRevealing(true)}>Play recap</button>
             <div className="menu" ref={moreRef}>
-              <button aria-expanded={moreOpen} onClick={() => setMoreOpen((o) => !o)}>
+              <button
+                aria-haspopup="menu"
+                aria-expanded={moreOpen}
+                onClick={() => setMoreOpen((o) => !o)}
+              >
                 More
               </button>
               {moreOpen && (

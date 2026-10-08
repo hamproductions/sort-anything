@@ -35,6 +35,7 @@ No backend: every shared result or list lives entirely in the URL, and sorts in 
 bun install
 bun run dev
 bun run test
+bun run test:e2e
 bun run build
 ```
 
